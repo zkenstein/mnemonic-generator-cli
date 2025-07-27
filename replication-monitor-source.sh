@@ -28,13 +28,13 @@ _host="localhost"
  
 _out="/tmp/mysql-status.$$"
 _errs=()
-_m_vars='Replica_IO_Running|Replica_SQL_Running|Seconds_Behind_Source|Last_Errno'
+_m_vars='Replica_IO_Running|Replica_SQL_Running|Seconds_Behind_Source|Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master|Last_Errno'
 _is_error_found="false"
 _alert_limit=60
  
 # Email settings 
 FROM="smtp.out@cyberciti.biz"
-TO="opmat01@yahoo.com"
+TO="opm01@yahoo.com"
  
 # Grab keys and bash function  for pushover API 
 #source ~/bin/cli_app.sh
@@ -93,21 +93,41 @@ do
   value=$(awk -F':' -v m="${v}:" '$0 ~ m { gsub(/ /, "", $2); print $2 }' "${_out}")
   if [ "$v" == "Replica_IO_Running" ]
   then
-      [[ "$value" != "Yes" ]] && { _errs=("${_errs[@]}" "<p>The I/O thread for reading the master's binary log not fo>
+      [[ "$value" != "Yes" ]] && { _errs=("${_errs[@]}" "<p>The I/O thread for reading the master's binary log not found ($v: $value)</p>");
+                     _is_error_found="true"; }
+  fi
+  if [ "$v" == "Slave_IO_Running" ]
+  then
+      [[ "$value" != "Yes" ]] && { _errs=("${_errs[@]}" "<p>The I/O thread for reading the master's binary log not found ($v: $value)</p>");
                      _is_error_found="true"; }
   fi
   if [ "$v" == "Replica_SQL_Running" ]
   then
-      [[ "$value" !=  "Yes" ]] && { _errs=("${_errs[@]}" "<p>The SQL thread for executing events in the relay log is >
+      [[ "$value" !=  "Yes" ]] && { _errs=("${_errs[@]}" "<p>The SQL thread for executing events in the relay log is ($v: $value)</p>");
+                     _is_error_found="true"; }
+  fi
+  if [ "$v" == "Slave_SQL_Running" ]
+  then
+      [[ "$value" !=  "Yes" ]] && { _errs=("${_errs[@]}" "<p>The SQL thread for executing events in the relay log is ($v: $value)</p>");
                      _is_error_found="true"; }
   fi
   if [ "$v" == "Seconds_Behind_Source" ]
   then
-      [ "$value" == "NULL" ] && { _errs=("${_errs[@]}" "<p>The slave server is in undefined or unknown state ($v: $va>
+      [ "$value" == "NULL" ] && { _errs=("${_errs[@]}" "<p>The slave server is in undefined or unknown state ($v: $value)</p>"); 
                       _is_error_found="true"; }
       if [[ $value =~ ^[0-9]+$ ]]
       then
-          [ "$value" -gt $_alert_limit ] && { _errs=("${_errs[@]}" "<p>The Slave server is behind the master for at l>
+          [ "$value" -gt $_alert_limit ] && { _errs=("${_errs[@]}" "<p>The Replica server is behind the source for at least $_alert_limit seconds ($v: $value)</p>");
+                                              _is_error_found="true"; }
+      fi
+  fi
+  if [ "$v" == "Seconds_Behind_Master" ]
+  then
+      [ "$value" == "NULL" ] && { _errs=("${_errs[@]}" "<p>The slave server is in undefined or unknown state ($v: $value)</p>"); 
+                      _is_error_found="true"; }
+      if [[ $value =~ ^[0-9]+$ ]]
+      then
+          [ "$value" -gt $_alert_limit ] && { _errs=("${_errs[@]}" "<p>The Slave server is behind the master for at least $_alert_limit seconds ($v: $value)</p>");
                                               _is_error_found="true"; }
       fi
   fi
