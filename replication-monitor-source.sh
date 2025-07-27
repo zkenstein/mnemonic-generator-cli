@@ -28,7 +28,7 @@ _host="localhost"
  
 _out="/tmp/mysql-status.$$"
 _errs=()
-_m_vars='Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master|Last_Errno'
+_m_vars='Replica_IO_Running|Replica_SQL_Running|Seconds_Behind_Source|Last_Errno'
 _is_error_found="false"
 _alert_limit=60
  
