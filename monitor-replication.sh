@@ -14,7 +14,7 @@ _alert_limit=60
  
 # Email settings 
 FROM="smtp.out@cyberciti.biz"
-TO="opmat01@yahoo.com"
+TO="opm01@yahoo.com"
  
 # Grab keys and bash function  for pushover API 
 #source ~/bin/cli_app.sh
@@ -22,7 +22,7 @@ TO="opmat01@yahoo.com"
  
 # Send html email to "$TO" from "$FROM" 
 html_email(){
-    local SUBJECT="$HOSTNAME - mariadb/mysql slave server error(s)"
+    local SUBJECT="$HOSTNAME - mariadb/mysql replication server error(s)"
     local MSG=("$@")
     (
         echo "From: $FROM"
